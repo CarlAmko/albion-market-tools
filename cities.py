@@ -2,7 +2,7 @@ from enum import Enum
 
 
 # noinspection SpellCheckingInspection
-class Town(Enum):
+class City(Enum):
     Caerleon = 'Caerleon'
     Bridgewatch = 'Bridgewatch'
     Thetford = 'Thetford'
