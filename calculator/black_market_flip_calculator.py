@@ -1,29 +1,64 @@
-import datafetch
 import cities
+import datafetch
 
 
-def get_black_market_prices(item_ids: list):
-    return datafetch.fetch_current_prices(item_ids, city=cities.City.Black_Market.value)['sell_price_min']
-
-
-def get_caerleon_market_prices(item_ids: list):
-    return datafetch.fetch_current_prices(item_ids, city=cities.City.Caerleon.value)['sell_price_min']
-
-
-# TODO: This is expensive... add hourly caching here.
-def find_max_profits(min_profit: int = 0):
+def find_max_profits(min_profit: int = 1000):
     profits = {}
-    item_ids = [item['UniqueName'] for item in datafetch.ITEM_DATA]
-    bm_prices = get_black_market_prices(item_ids)
-    c_prices = get_caerleon_market_prices(item_ids)
+    for item in datafetch.ITEM_DATA:
+        item_id = item['UniqueName']
+        car_prices = datafetch.get_item_price_data(item_id, cities.City.Caerleon)
+        bm_prices = datafetch.get_item_price_data(item_id, cities.City.Black_Market)
 
-    if len(bm_prices) != len(c_prices):
-        raise IndexError("Prices not same length!")
+        buy_prices, sell_prices = [], []
+        for k, car_price in car_prices.items():
+            bm_key = k.replace('Caerleon', 'Black Market')
+            if bm_key in bm_prices:
+                bm_price = bm_prices[bm_key]
+                buy_prices.append(int(car_price['sell_price_min']))
+                sell_prices.append(int(bm_price['sell_price_min']))
 
-    for item_id, bm_item in bm_prices.items():
-        c_item = c_prices[item_id]
-        profit = bm_item['sell_price_min'] - c_item['sell_price_min']
-        if profit > min_profit:
-            profits[item_id] = profit
+        buy_index, best_profit = 0, 0
+        for i, v in enumerate(buy_prices):
+            if v < buy_prices[buy_index]:
+                buy_index = i
 
-    return profits
+        for i in range(buy_index):
+            profit = sell_prices[i] - buy_prices[buy_index]
+            if profit >= min_profit:
+                key = item['LocalizedNames']['EN-US']
+                if '@' in item_id:
+                    key += '@' + item_id.split('@')[1]
+                profits[key] = profit
+
+    return {k: v for k, v in sorted(profits.items(), key=lambda x: x[1], reverse=True)}
+
+
+def find_max_instant_profits(min_profit: int = 1000):
+    profits = {}
+    for item in datafetch.ITEM_DATA:
+        item_id = item['UniqueName']
+        car_prices = datafetch.get_item_price_data(item_id, cities.City.Caerleon)
+        bm_prices = datafetch.get_item_price_data(item_id, cities.City.Black_Market)
+
+        buy_prices, sell_prices = [], []
+        for k, car_price in car_prices.items():
+            bm_key = k.replace('Caerleon', 'Black Market')
+            if bm_key in bm_prices:
+                bm_price = bm_prices[bm_key]
+                buy_prices.append(int(car_price['sell_price_min']))
+                sell_prices.append(int(bm_price['buy_price_max']))
+
+        buy_index, best_profit = 0, 0
+        for i, v in enumerate(buy_prices):
+            if v < buy_prices[buy_index]:
+                buy_index = i
+
+        for i in range(buy_index):
+            profit = sell_prices[i] - buy_prices[buy_index]
+            if profit >= min_profit:
+                key = item['LocalizedNames']['EN-US']
+                if '@' in item_id:
+                    key += '@' + item_id.split('@')[1]
+                profits[key] = profit
+
+    return {k: v for k, v in sorted(profits.items(), key=lambda x: x[1], reverse=True)}

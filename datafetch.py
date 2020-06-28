@@ -10,14 +10,13 @@ API_BASE_URL = 'http://albion-online-data.com/api/v2/stats/prices/'
 # Parse item data
 with open('data/items.json') as _json:
     ITEM_DATA = json.load(_json)
-    print(len(ITEM_DATA))
 
 # Open connection to Redis for caching
 with open('config.json') as _config:
     config = json.load(_config)
 
-r = redis.Redis(host=config['redis_url'], port=config['redis_port'], password=config['redis_password'])
-r.delete('foo')
+r = redis.Redis(host=config['redis_url'], port=config['redis_port'], password=config['redis_password'],
+                decode_responses=True)
 
 
 def generate_cache_key(item_id: str, city: str, quality: int) -> str:
@@ -29,7 +28,11 @@ def check_cache(item_id: str, city: str, quality: int) -> bool:
     return r.exists(key)
 
 
-def fetch_all_prices_and_update_cache():
+def fetch_prices_and_update_cache(item_ids=None, city=None):
+    # default to using all item data
+    if item_ids is None:
+        item_ids = list(map(lambda x: x['UniqueName'], ITEM_DATA))
+
     def fetch_current_prices(_item_ids: list, _city: str = None):
         search_url = API_BASE_URL + ','.join(_item_ids)
         params = {}
@@ -38,12 +41,11 @@ def fetch_all_prices_and_update_cache():
         return requests.get(search_url, params=params).json()
 
     batch = []
-    for data in ITEM_DATA:
-        item_id = data['UniqueName']
+    for i, item_id in enumerate(item_ids):
         batch.append(item_id)
 
-        if len(batch) == 100:
-            response = fetch_current_prices(batch)
+        if len(batch) == 100 or i == len(item_ids) - 1:
+            response = fetch_current_prices(batch, city)
             batch.clear()
 
             # Update cache with data
@@ -57,10 +59,8 @@ def fetch_all_prices_and_update_cache():
                 }
                 # generate key prefix
                 key = generate_cache_key(_item_id, _city, _quality)
+                # store in cache
                 r.hmset(key, _prices)
-                # assign expiration 1 hour from now
-                secs_in_hour = 3600
-                r.expire(key, secs_in_hour)
 
 
 def get_item_price_data(item_id: str, city: cities.City = None, quality: int = None):
@@ -77,8 +77,12 @@ def get_item_price_data(item_id: str, city: cities.City = None, quality: int = N
         return pattern
 
     match_pattern = create_key_match_pattern()
-    keys = r.scan(match=match_pattern, count=5)
-    print(keys)
+    keys = r.keys(match_pattern)
+
+    res = {}
+    for key in keys:
+        res[key] = r.hgetall(key)
+    return res
 
 
 def find_item_id_by_name(name: str) -> str:
