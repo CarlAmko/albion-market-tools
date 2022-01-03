@@ -1,6 +1,5 @@
 from typing import Optional
 
-import cities
 import data.prefix as prefix
 import datafetch
 from cities import City
@@ -67,7 +66,6 @@ def calculate_enchant_profits(item_id: str, city: City) -> Optional[dict]:
 
 	return profits
 
-
 # TODO: This is expensive. There are currently 1886 equipment items that can be enchanted, and API is rate-limited to
 # TODO:  300 calls / 5 mins.
 # def find_best_enchants(city: City) -> dict:
@@ -80,9 +78,3 @@ def calculate_enchant_profits(item_id: str, city: City) -> Optional[dict]:
 # 			if profits:
 # 				results.update(profits)
 # 	return results
-
-
-# if __name__ == '__main__':
-# 	_id = datafetch.find_item_id_by_name("Master's Assassin Jacket")
-# 	profits = calculate_enchant_profits(_id, city=cities.City.Lymhurst)
-# 	print(profits)

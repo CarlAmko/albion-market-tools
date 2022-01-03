@@ -3,3 +3,4 @@ __pycache__/
 
 data/config.json
 results.json
+dump.json

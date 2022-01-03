@@ -9,6 +9,7 @@ setup(
 	url='https://github.com/Okma/albion-market-tools',
 	install_requires=[
 		'requests>=2.26.0',
-		'redis>=4.1.0'
+		'redis>=4.1.0',
+		'Scrapy>=2.5.1'
 	]
 )

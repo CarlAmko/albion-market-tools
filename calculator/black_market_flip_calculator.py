@@ -8,8 +8,8 @@ def find_max_profits(min_profit: int = 1000):
 	profits = {}
 	for item in datafetch.ITEM_DATA:
 		item_id = item['UniqueName']
-		car_prices = datafetch.get_item_price_data(item_id, cities.City.Caerleon)
-		bm_prices = datafetch.get_item_price_data(item_id, cities.City.Black_Market)
+		car_prices = datafetch.get_item_price(item_id, city=cities.City.Caerleon)
+		bm_prices = datafetch.get_item_price(item_id, city=cities.City.Black_Market)
 
 		buy_prices, sell_prices = [], []
 		for k, car_price in car_prices.items():
@@ -39,8 +39,8 @@ def find_max_instant_profits(min_profit: int = 1000):
 	profits = {}
 	for item in datafetch.ITEM_DATA:
 		item_id = item['UniqueName']
-		car_prices = datafetch.get_item_price_data(item_id, cities.City.Caerleon)
-		bm_prices = datafetch.get_item_price_data(item_id, cities.City.Black_Market)
+		car_prices = datafetch.get_item_price(item_id, city=cities.City.Caerleon)
+		bm_prices = datafetch.get_item_price(item_id, city=cities.City.Black_Market)
 
 		buy_prices, sell_prices = [], []
 		for k, car_price in car_prices.items():

@@ -6,7 +6,7 @@ import requests
 
 import cities
 from cities import City
-from data.cache import cache_entry, get_item_price_data, generate_entry_key
+from data.cache import cache_item_prices, get_item_price, generate_entry_key
 
 API_BASE_URL = 'https://albion-online-data.com/api/v2/stats/prices/'
 
@@ -33,7 +33,7 @@ def get_prices(item_ids: List[str] = None, city: Union[Optional[City], Optional[
 	# First check cache for prices.
 	for item_id in item_ids:
 		for _city in city:
-			result = get_item_price_data(item_id, city=_city)
+			result = get_item_price(item_id, city=_city)
 			if result:
 				for key, value in result.items():
 					prices[key] = value
@@ -59,7 +59,7 @@ def get_prices(item_ids: List[str] = None, city: Union[Optional[City], Optional[
 					'buy_price_min': item['buy_price_min'],
 					'buy_price_max': item['buy_price_max'],
 				}
-				cache_entry(_item_id, _quality, _city, _prices)
+				cache_item_prices(_item_id, _quality, _city, _prices)
 				key = generate_entry_key(_item_id, _quality, _city)
 				prices[key] = item
 

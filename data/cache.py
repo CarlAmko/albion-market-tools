@@ -26,12 +26,12 @@ def check_cache(item_id: str, quality: int, city: City) -> bool:
 	return cache.exists(key) != 0
 
 
-def cache_entry(item_id: str, quality: int, city: City, values: dict):
+def cache_item_prices(item_id: str, quality: int, city: City, values: dict):
 	key = generate_entry_key(item_id, quality, city)
 	cache.hmset(key, values)
 
 
-def get_item_price_data(item_id: str, quality: int = None, city: City = None) -> dict:
+def get_item_price(item_id: str, quality: int = None, city: City = None) -> dict:
 	def create_key_match_pattern():
 		return f'{item_id}:{quality if quality else "*"}:{city.value if city else "*"}'
 
