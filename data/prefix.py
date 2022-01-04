@@ -22,6 +22,10 @@ def is_shoe(item_id: str):
 	return 'SHOES' in item_id
 
 
+def is_cape(item_id: str):
+	return 'CAPEITEM' in item_id
+
+
 def is_1h(item_id: str):
 	return '1H' in item_id or 'MAIN' in item_id
 
@@ -35,7 +39,7 @@ def is_weapon(item_id: str):
 
 
 def is_equipment(item_id: str):
-	return is_armor(item_id) or is_head(item_id) or is_shoe(item_id) or is_weapon(item_id)
+	return is_armor(item_id) or is_head(item_id) or is_shoe(item_id) or is_weapon(item_id) or is_cape(item_id)
 
 
 def get_tier(item_id: str) -> int:

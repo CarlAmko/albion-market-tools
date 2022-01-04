@@ -8,7 +8,7 @@ from data.cache import generate_entry_key
 
 def get_items_required_for_enchant(item_id: str):
 	base_enchant_quantity = 48
-	if prefix.is_shoe(item_id) or prefix.is_head(item_id):
+	if prefix.is_shoe(item_id) or prefix.is_head(item_id) or prefix.is_cape(item_id):
 		return base_enchant_quantity
 	elif prefix.is_armor(item_id):
 		return base_enchant_quantity * 2
@@ -64,7 +64,7 @@ def calculate_enchant_profits(item_id: str, city: City) -> Optional[dict]:
 			if net_profit > 0:
 				profits[key] = net_profit
 
-	return profits
+	return dict(reversed(sorted(profits.items(), key=lambda x: x[1])))
 
 # TODO: This is expensive. There are currently 1886 equipment items that can be enchanted, and API is rate-limited to
 # TODO:  300 calls / 5 mins.
